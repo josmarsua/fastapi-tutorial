@@ -47,3 +47,9 @@ app.include_router(api_router)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# How to test the API?
+# http://localhost:8000/search/?keyword=chicken&max_results=2
+# http://localhost:8000/search/?keyword=chicken
+# http://localhost:8000/search/?max_results=2
+# http://localhost:8000/search/
