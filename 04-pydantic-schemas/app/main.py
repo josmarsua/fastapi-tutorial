@@ -1,0 +1,42 @@
+from fastapi import FastAPI, APIRouter, Query
+from typing import Optional
+
+from app.schemas import RecipeSearchResults, Recipe, RecipeCreate
+from app.recipe_data import RECIPES
+
+app = FastAPI(title="Recipe API", openapi_url="/openapi.json")
+api_router = APIRouter()
+
+@api_router.get("/", status_code=200)
+def root() -> dict:
+    return {"message": "Hello World"}
+
+# Path parameter
+@api_router.get("/recipe/{recipe_id}", status_code=200)
+def fetch_recipe(*, recipe_id: int) -> Recipe:
+    """
+    Fetch a recipe by its ID
+    """
+    result = [recipe for recipe in RECIPES if recipe["id"] == recipe_id]
+    return result[0] if result else None
+
+# Query Parameter
+@api_router.get("/search/", status_code=200, response_model=RecipeSearchResults)
+def search_recipes(
+    *,
+    keyword: Optional[str] = Query(default=None, min_length=3, max_length=100, openapi_examples={
+        "chickenExample": {
+            "summary": "Chicken recipe",
+            "value": "chicken",
+        }
+    }),
+    max_results: Optional[int] = 10
+) -> dict:
+    """
+    Search recipes by keyword
+    """
+    if not keyword:
+        return {"results": RECIPES[:max_results]}
+    
+    results = filter(lambda recipe: keyword.lower() in recipe["label"].lower(), RECIPES)
+    return {"results": list(results)[:max_results]}
